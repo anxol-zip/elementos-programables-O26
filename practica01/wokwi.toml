@@ -1,0 +1,4 @@
+[wokwi]
+version = 1
+firmware = 'build/practica_semaforos.uf2'
+elf = 'build/practica_semaforos.elf'
