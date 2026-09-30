@@ -1,3 +1,6 @@
+> [!Note]
+> Este es el .md original que nos dio el profesor como parte de las instrucciones de la práctica.
+
 # Monitor interactivo RP2040 — mini REPL didáctico
 
 Proyecto para Raspberry Pi Pico original con RP2040 y Pico SDK.

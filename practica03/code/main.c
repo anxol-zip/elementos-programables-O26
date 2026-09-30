@@ -8,17 +8,13 @@
 #include <stdint.h>
 
 #include "pico/stdlib.h"
-//#include "pico/stdio_usb.h"
+#include "pico/stdio_usb.h"
 #include "hardware/gpio.h"
 #include "hardware/structs/sio.h"
 
-// Pico W / Pico 2 W: el LED integrado esta en el chip inalambrico (CYW43),
+// Pico 2 W: el LED integrado esta en el chip inalambrico (CYW43),
 // no en un GPIO, asi que se usa un LED externo en GP15 (330 ohm a GND)
-#ifdef CYW43_WL_GPIO_LED_PIN
 #define LED_PIN 15
-#else
-#define LED_PIN 25
-#endif
 #define BUTTON_PIN 13
 #define LED_MASK (1u << LED_PIN)
 #define BUTTON_MASK (1u << BUTTON_PIN)
@@ -45,8 +41,8 @@ static int cmd_status(int argc, char **argv);
 
 static const command_t commands[] = {
     {"help",   "Muestra la lista de comandos ",          cmd_help},
-    {"on",     "Enciende el LED (GPIO25 o GP15)",      cmd_on},
-    {"off",    "Apaga el LED (GPIO25 o GP15)",         cmd_off},
+    {"on",     "Enciende el LED GP15",      cmd_on},
+    {"off",    "Apaga el LED GP15",         cmd_off},
     {"toggle", "Invierte el estado del LED",           cmd_toggle},
     {"read",   "Lee el boton conectado a GPIO13",      cmd_read},
     {"sio",    "Muestra GPIO_IN, GPIO_OUT y GPIO_OE",  cmd_sio},
@@ -111,7 +107,7 @@ static void execute_command(int argc, char **argv) {
         }
     }
 
-    printf("Comando desconocido: %s\n", argv[0]);
+    printf("\nComando desconocido: %s\n", argv[0]);
     printf("Escribe 'help'.\n");
 }
 
@@ -126,7 +122,7 @@ static int cmd_help(int argc, char **argv) {
 static int cmd_on(int argc, char **argv) {
     (void)argc; (void)argv;
     sio_hw->gpio_set = LED_MASK;
-    printf("LED GPIO%d = 1\n", LED_PIN);
+    printf("\nLED GPIO%d = 1\n", LED_PIN);
     printf("sio_hw->gpio_set = 1u << %d;\n", LED_PIN);
     return 0;
 }
@@ -134,7 +130,7 @@ static int cmd_on(int argc, char **argv) {
 static int cmd_off(int argc, char **argv) {
     (void)argc; (void)argv;
     sio_hw->gpio_clr = LED_MASK;
-    printf("LED GPIO%d = 0\n", LED_PIN);
+    printf("\nLED GPIO%d = 0\n", LED_PIN);
     printf("sio_hw->gpio_clr = 1u << %d;\n", LED_PIN);
     return 0;
 }
@@ -142,7 +138,7 @@ static int cmd_off(int argc, char **argv) {
 static int cmd_toggle(int argc, char **argv) {
     (void)argc; (void)argv;
     sio_hw->gpio_togl = LED_MASK;
-    printf("GPIO%d invertido con GPIO_OUT_XOR\n", LED_PIN);
+    printf("\nGPIO%d invertido con GPIO_OUT_XOR\n", LED_PIN);
     return 0;
 }
 
@@ -183,7 +179,7 @@ static int cmd_sio(int argc, char **argv) {
 static int cmd_mask(int argc, char **argv) {
     (void)argc; (void)argv;
 
-    printf("1u << %d\n", LED_PIN);
+    printf("\n1u << %d\n", LED_PIN);
     printf("Hex: 0x%08lx\n", (unsigned long)LED_MASK);
     printf("Bin: ");
     print_binary32(LED_MASK);
@@ -201,7 +197,7 @@ static int cmd_status(int argc, char **argv) {
     bool led   = (salidas  & LED_MASK)    != 0;
     bool boton = (entradas & BUTTON_MASK) != 0;
 
-    printf("GPIO%d - LED : %d\n", LED_PIN, led ? 1 : 0);
+    printf("\nGPIO%d - LED : %d\n", LED_PIN, led ? 1 : 0);
     printf("GPIO%d - BOTON : %d\n", BUTTON_PIN, boton ? 1 : 0);
     return 0;
 }
@@ -220,10 +216,11 @@ int main(void) {
     stdio_init_all();
     hardware_init() ;
 
-  /*   while (!stdio_usb_connected()) {
+    // Esperar a que se abra el monitor serial para no perder el mensaje inicial
+    while (!stdio_usb_connected()) {
         sleep_ms(50);
-    } */
-  
+    }
+
     printf("\n=====================================\n");
     printf(" Monitor didactico RP2040 - SIO\n");
     printf("=====================================\n");
@@ -233,7 +230,7 @@ int main(void) {
     char *argv[MAX_ARGS];
 
     while (true) {
-        printf("RP2040> ");
+        printf("\nRP2040> ");
         read_line(line, sizeof(line));
         int argc = split_line(line, argv, MAX_ARGS);
         execute_command(argc, argv);
